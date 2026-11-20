@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRMS 2.0 — e-Service Register (ESR) Data Collection</title>
+<style>
+  :root {
+    --primary: #1e3a8a;
+    --primary-dark: #0f172a;
+    --accent: #d97706;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --border: #cbd5e1;
+    --text: #1e293b;
+    --muted: #64748b;
+    --success: #15803d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Kannada', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    line-height: 1.45;
+  }
+  header.app-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  }
+  .name-board {
+    max-width: 1060px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #7f1d1d 0%, #991b1b 100%);
+    border: 4px double #facc15;
+    border-radius: 10px;
+    padding: 12px 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 0 12px rgba(250,204,21,0.25);
+  }
+  .board-title {
+    color: #fef08a;
+    font-size: 1.42rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-shadow: 1px 2px 3px rgba(0,0,0,0.65);
+    outline: none;
+    cursor: text;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .board-subtitle {
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin-top: 5px;
+    outline: none;
+    cursor: text;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .board-title:hover, .board-title:focus,
+  .board-subtitle:hover, .board-subtitle:focus {
+    background: rgba(255,255,255,0.14);
+    outline: 1px dashed #fde047;
+  }
+  .board-edit-hint {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.72rem;
+    color: #fde68a;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .toolbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .btn {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 13px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #166534; }
+  .btn-amber { background: #d97706; color: #fff; }
+  .btn-amber:hover { background: #b45309; }
+  .btn-outline { background: #f8fafc; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover { background: #e2e8f0; }
+  .btn-danger { background: #dc2626; color: #fff; }
+  .btn-sm { padding: 4px 9px; font-size: 0.78rem; }
+
+  .container {
+    max-width: 1180px;
+    margin: 18px auto 90px;
+    padding: 0 14px;
+  }
+  .info-banner {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+  }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .tab-btn {
+    background: #e2e8f0;
+    color: #334155;
+    border: none;
+    padding: 8px 13px;
+    border-radius: 6px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .tab-btn.active { background: var(--primary); color: #fff; }
+
+  .section-panel { display: none; }
+  .section-panel.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .card-header {
+    background: #1e3a8a;
+    color: #fff;
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 0.96rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sub-header {
+    background: #e0e7ff;
+    color: #1e3a8a;
+    padding: 7px 14px;
+    font-weight: 700;
+    font-size: 0.88rem;
+  }
+  table.esr-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table.esr-table th {
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.83rem;
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  table.esr-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    vertical-align: middle;
+    font-size: 0.88rem;
+  }
+  table.esr-table td.field-label {
+    width: 34%;
+    font-weight: 600;
+    background: #fcfcfd;
+  }
+  .req { color: #dc2626; font-weight: bold; }
+
+  input[type="text"], input[type="date"], input[type="number"], input[type="email"], select {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    background: #fff;
+  }
+  .kn-input {
+    font-family: 'Noto Sans Kannada', 'Tunga', sans-serif;
+    background: #fefce8;
+  }
+  .hint {
+    font-size: 0.74rem;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .photo-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 6px 0;
+  }
+  .photo-preview-wrap {
+    width: 125px;
+    height: 150px;
+    border: 2px dashed #94a3b8;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+    text-align: center;
+    font-size: 0.76rem;
+    color: #64748b;
+  }
+  .photo-preview-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .photo-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-width: 340px;
+  }
+  .badge-kb {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.75);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: #fff;
+    border-radius: 10px;
+    max-width: 440px;
+    width: 100%;
+    padding: 16px;
+    text-align: center;
+  }
+  video#cameraStream {
+    width: 100%;
+    border-radius: 8px;
+    background: #000;
+    max-height: 320px;
+  }
+
+  .copy-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .copy-val {
+    font-family: monospace;
+    background: #f1f5f9;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+
+  .repeat-item {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin: 10px;
+    padding: 8px;
+    background: #fafaf9;
+  }
+  .repeat-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #1e3a8a;
+    font-size: 0.88rem;
+  }
+
+  footer.app-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #0f172a, #1e3a8a, #312e81, #0f172a);
+    background-size: 300% 300%;
+    animation: gradientShift 8s ease infinite;
+    color: #fff;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    z-index: 200;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .footer-highlight { color: #fde047; font-weight: 700; }
+  .footer-kn { color: #7dd3fc; font-weight: 600; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 10mm; }
+    body { background: #fff !important; color: #000 !important; font-size: 9.5pt; }
+    .no-print, .toolbar, .tabs, .info-banner, footer.app-footer, .photo-controls, .btn, .hint, #panel-copypaste, #panel-settings {
+      display: none !important;
+    }
+    header.app-header { background: none !important; box-shadow: none !important; padding: 0 0 8px 0 !important; }
+    .name-board { background: #fff !important; border: 2px solid #000 !important; box-shadow: none !important; padding: 8px 12px !important; }
+    .board-title { color: #000 !important; text-shadow: none !important; font-size: 14pt !important; }
+    .board-subtitle { color: #000 !important; font-size: 10pt !important; }
+    .container { max-width: 100%; margin: 0; padding: 0; }
+    .section-panel.form-part { display: block !important; }
+    .card { box-shadow: none !important; border: 1px solid #333 !important; margin-bottom: 10px !important; }
+    .card-header { background: #e2e8f0 !important; color: #000 !important; border-bottom: 1px solid #333 !important; padding: 6px 10px !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    table.esr-table th, table.esr-table td { border: 1px solid #444 !important; padding: 4px 6px !important; }
+    input, select { border: none !important; background: transparent !important; padding: 1px 2px !important; font-weight: 600; color: #000 !important; appearance: none; -webkit-appearance: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="name-board">
+    <div class="board-title" contenteditable="true" spellcheck="false" title="Click to edit Office Name Board">ಕ್ಷೇತ್ರ ಶಿಕ್ಷಣಾಧಿಕಾರಿಗಳ ಕಾರ್ಯಾಲಯ ಚಿಕ್ಕನಾಯಕನಹಳ್ಳಿ ತಾಲ್ಲೂಕು ತುಮಕೂರು ಜಿಲ್ಲೆ</div>
+    <div class="board-subtitle" contenteditable="true" spellcheck="false" title="Click to edit Sub-heading">KARNATAKA HRMS 2.0 — e-SERVICE REGISTER (ESR) DATA COLLECTION FORM (ನಮೂನೆ)</div>
+    <span class="board-edit-hint no-print">&#9998; ನೇಮ್ ಬೋರ್ಡ್ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ ಎಡಿಟ್ ಮಾಡಬಹುದು (Click name board to edit)</span>
+  </div>
+</header>
+
+<div class="toolbar no-print">
+  <button class="btn btn-primary" onclick="saveLocalDraft()">&#128190; Save Draft</button>
+  <button class="btn btn-success" onclick="window.print()">&#128196; Download / Print PDF</button>
+  <button class="btn btn-amber" onclick="openTab('panel-copypaste', this)">&#128203; HRMS Copy-Paste View</button>
+  <button class="btn btn-outline" onclick="exportCSV()">&#128202; Export CSV</button>
+  <button class="btn btn-outline" onclick="exportJSON()">&#128229; Backup JSON</button>
+  <label class="btn btn-outline" style="margin:0;">
+    &#128228; Load JSON <input type="file" accept=".json" style="display:none" onchange="importJSON(event)">
+  </label>
+  <button class="btn btn-primary" id="btnCloudSubmit" onclick="submitToGoogleSheet()">&#9729; Submit Online</button>
+  <button class="btn btn-outline" onclick="openTab('panel-settings', this)">&#9881; Setup Link</button>
+  <button class="btn btn-danger btn-sm" onclick="clearAllData()">Reset</button>
+</div>
+
+<div class="container">
+  <div class="info-banner no-print">
+    <strong>ಸೂಚನೆ:</strong> Enter details in <strong>English</strong> — Name &amp; Address fields translate/transliterate into <strong>ಕನ್ನಡ (Kannada)</strong> in the next column and can be edited anytime. Upload or capture photos to compress automatically to <strong>&le; 100 KB (.JPG)</strong>.
+  </div>
+
+  <div class="tabs no-print">
+    <button class="tab-btn active" onclick="openTab('part1', this)">Part I: Personal, Spouse &amp; Hometown</button>
+    <button class="tab-btn" onclick="openTab('part2', this)">Part II: Education, Exams, Family &amp; Nominee</button>
+    <button class="tab-btn" onclick="openTab('part3', this)">Part III: Previous &amp; Foreign Service</button>
+    <button class="tab-btn" onclick="openTab('part4a', this)">Part IV (1-4): Appointment, Probation &amp; Promotion</button>
+    <button class="tab-btn" onclick="openTab('part4b', this)">Part IV (5-13) &amp; VI: Discipline, Charge, Awards &amp; LTC</button>
+    <button class="tab-btn" onclick="openTab('panel-copypaste', this)" style="background:#fef3c7;color:#92400e;">&#128203; Copy-Paste &amp; Photo Download</button>
+  </div>
+
+  <form id="esrForm">
+    <!-- PART I -->
+    <div id="part1" class="section-panel form-part active">
+      <div class="card">
+        <div class="card-header">
+          <span>PART I : A. PERSONAL INFORMATION (ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ)</span>
+          <span>HRMS 2.0 ESR</span>
+        </div>
+        <table class="esr-table">
+          <thead>
+            <tr>
+              <th style="width:34%;">Particulars / ವಿವರಗಳು</th>
+              <th style="width:33%;">English</th>
+              <th style="width:33%;">ಕನ್ನಡ (Auto-Translated &amp; Editable)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="field-label">KGID / Employee ID</td>
+              <td><input type="text" name="kgid_no" placeholder="KGID / Employee ID"></td>
+              <td><input type="text" class="kn-input" name="kgid_no_kn" placeholder="ಕೆಜಿಐಡಿ ಸಂಖ್ಯೆ"></td>
+            </tr>
+            <tr>
+              <td class="field-label">1. Name of the Government Servant (As per SSLC &amp; SR) <span class="req">*</span></td>
+              <td><input type="text" name="emp_name_en" data-kn-target="emp_name_kn" placeholder="Enter Name in English" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="emp_name_kn" placeholder="ಸರ್ಕಾರಿ ನೌಕರರ ಹೆಸರು (ಕನ್ನಡದಲ್ಲಿ ಎಡಿಟ್ ಮಾಡಬಹುದು)"></td>
+            </tr>
+            <tr><td colspan="3" class="sub-header">2. Present Residence (ಪ್ರಸ್ತುತ ವಾಸಸ್ಥಳ)</td></tr>
+            <tr>
+              <td class="field-label">2(i). Address <span class="req">*</span></td>
+              <td><input type="text" name="res_addr_en" data-kn-target="res_addr_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="res_addr_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">2(ii). Revenue District <span class="req">*</span></td>
+              <td><input type="text" name="res_dist_en" data-kn-target="res_dist_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="res_dist_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">2(iii). Revenue Block / Taluka <span class="req">*</span></td>
+              <td><input type="text" name="res_taluk_en" data-kn-target="res_taluk_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="res_taluk_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">2(iv). City / Village Name <span class="req">*</span></td>
+              <td><input type="text" name="res_village_en" data-kn-target="res_village_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="res_village_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">2(v). Pincode <span class="req">*</span> &amp; 2(vi). Mobile <span class="req">*</span></td>
+              <td><input type="text" name="res_pincode" maxlength="6" placeholder="Pincode"></td>
+              <td><input type="text" name="res_mobile" maxlength="10" placeholder="Mobile Number"></td>
+            </tr>
+            <tr>
+              <td class="field-label">2(vii). Landline &amp; 2(viii). E-mail Id</td>
+              <td><input type="text" name="res_landline" placeholder="STD-Landline"></td>
+              <td><input type="email" name="res_email" placeholder="Email ID"></td>
+            </tr>
+            <tr><td colspan="3" class="sub-header">3 &amp; 4. Father's Name &amp; Residence</td></tr>
+            <tr>
+              <td class="field-label">3. Father's First Name <span class="req">*</span></td>
+              <td><input type="text" name="father_name_en" data-kn-target="father_name_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="father_name_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">4(i). Father's Address <span class="req">*</span></td>
+              <td><input type="text" name="father_addr_en" data-kn-target="father_addr_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="father_addr_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">4(ii). District <span class="req">*</span> &amp; 4(iii). Taluka <span class="req">*</span></td>
+              <td><input type="text" name="father_dist_en" data-kn-target="father_dist_kn" placeholder="District" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" name="father_taluk_en" data-kn-target="father_taluk_kn" placeholder="Taluka" oninput="handleTransliterate(this)"></td>
+            </tr>
+            <tr>
+              <td class="field-label">4(iv). Village <span class="req">*</span>, 4(v). Pincode <span class="req">*</span> &amp; 4(vi). Mobile <span class="req">*</span></td>
+              <td><input type="text" name="father_village_en" data-kn-target="father_village_kn" placeholder="Village" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" name="father_mobile" placeholder="Pincode & Mobile"></td>
+            </tr>
+            <tr><td colspan="3" class="sub-header">5. Other Details &amp; Photo (&le; 100 KB)</td></tr>
+            <tr>
+              <td class="field-label">5(i). Gender <span class="req">*</span> &amp; 5(ii). Religion</td>
+              <td>
+                <select name="gender">
+                  <option value="">-- Gender --</option>
+                  <option value="Male">Male (ಪುರುಷ)</option>
+                  <option value="Female">Female (ಮಹಿಳೆ)</option>
+                  <option value="Transgender">Transgender</option>
+                </select>
+              </td>
+              <td><input type="text" name="religion" placeholder="Religion"></td>
+            </tr>
+            <tr>
+              <td class="field-label">5(iii). Nationality <span class="req">*</span> &amp; 5(iv). Category <span class="req">*</span></td>
+              <td><input type="text" name="nationality" value="Indian"></td>
+              <td>
+                <select name="social_category">
+                  <option value="">-- Category --</option>
+                  <option value="GM">GM</option><option value="SC">SC</option><option value="ST">ST</option>
+                  <option value="Cat-1">Cat-1</option><option value="2A">2A</option><option value="2B">2B</option>
+                  <option value="3A">3A</option><option value="3B">3B</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="field-label">5(iv.1). Caste Cert No. &amp; 5(v). Date of Birth <span class="req">*</span></td>
+              <td><input type="text" name="caste_cert_no" placeholder="Certificate No. (if SC/ST)"></td>
+              <td><input type="date" name="dob" onchange="autoFillDobWords(this.value)"></td>
+            </tr>
+            <tr>
+              <td class="field-label">5(vi). DOB in Words &amp; 5(vii). Shaka Era</td>
+              <td><input type="text" name="dob_words" placeholder="DOB in Words"></td>
+              <td><input type="text" name="dob_shaka" placeholder="DOB in Shaka Era"></td>
+            </tr>
+            <tr>
+              <td class="field-label">5(viii). Height (cm) &amp; Blood Group <span class="req">*</span></td>
+              <td><input type="number" name="height_cm" placeholder="Height in cm"></td>
+              <td>
+                <select name="blood_group">
+                  <option value="">-- Blood Group --</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="field-label">5(ix). Marital Status <span class="req">*</span></td>
+              <td colspan="2">
+                <select name="marital_status">
+                  <option value="">-- Select --</option>
+                  <option value="Married">Married (ವಿವಾಹಿತ)</option>
+                  <option value="Unmarried">Unmarried (ಅವಿವಾಹಿತ)</option>
+                  <option value="Widow/Widower">Widow / Widower</option>
+                  <option value="Divorced">Divorced</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="field-label">5(x). Employee Photo (&le; 100 KB JPG) <span class="req">*</span></td>
+              <td colspan="2">
+                <div class="photo-box">
+                  <div class="photo-preview-wrap" id="empPhotoPreview"><span>No Photo<br>(Max 100 KB)</span></div>
+                  <div class="photo-controls">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <label class="btn btn-primary btn-sm" style="margin:0;">
+                        &#128193; Upload Photo
+                        <input type="file" accept="image/*" style="display:none" onchange="processImageFile(event, 'emp')">
+                      </label>
+                      <button type="button" class="btn btn-amber btn-sm" onclick="openCamera('emp')">&#128247; Capture Photo</button>
+                    </div>
+                    <span id="empPhotoMeta" class="badge-kb" style="display:none;"></span>
+                    <span class="hint">Auto-compressed to &le; 100 KB (.JPG)</span>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr><td colspan="3" class="sub-header">6. Personal Identification Marks</td></tr>
+            <tr>
+              <td class="field-label">6(i). Identification Mark 1 <span class="req">*</span></td>
+              <td><input type="text" name="id_mark1_en" data-kn-target="id_mark1_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="id_mark1_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">6(ii). Identification Mark 2 <span class="req">*</span></td>
+              <td><input type="text" name="id_mark2_en" data-kn-target="id_mark2_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="id_mark2_kn"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">PART I : B. SPOUSE DETAILS &amp; C. HOMETOWN</div>
+        <table class="esr-table">
+          <tbody>
+            <tr>
+              <td class="field-label">3(a). Husband / Wife Name</td>
+              <td><input type="text" name="spouse_name_en" data-kn-target="spouse_name_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="spouse_name_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">3(b). Spouse Address, Mobile &amp; 3(c). Working Details</td>
+              <td><input type="text" name="spouse_addr" placeholder="Spouse Address & Mobile"></td>
+              <td><input type="text" name="spouse_work" placeholder="Working? Designation, Dept & Office"></td>
+            </tr>
+            <tr>
+              <td class="field-label">Family Photo (&le; 100 KB JPG)</td>
+              <td colspan="2">
+                <div class="photo-box">
+                  <div class="photo-preview-wrap" id="famPhotoPreview"><span>No Family Photo<br>(Max 100 KB)</span></div>
+                  <div class="photo-controls">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <label class="btn btn-primary btn-sm" style="margin:0;">
+                        &#128193; Upload Family Photo
+                        <input type="file" accept="image/*" style="display:none" onchange="processImageFile(event, 'fam')">
+                      </label>
+                      <button type="button" class="btn btn-amber btn-sm" onclick="openCamera('fam')">&#128247; Capture Family Photo</button>
+                    </div>
+                    <span id="famPhotoMeta" class="badge-kb" style="display:none;"></span>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="field-label">1.3.1 Permanent Address <span class="req">*</span></td>
+              <td><input type="text" name="perm_addr_en" data-kn-target="perm_addr_kn" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="perm_addr_kn"></td>
+            </tr>
+            <tr>
+              <td class="field-label">Hometown (State, District, Taluka, Village) <span class="req">*</span></td>
+              <td><input type="text" name="home_town_en" data-kn-target="home_town_kn" placeholder="Hometown details in English" oninput="handleTransliterate(this)"></td>
+              <td><input type="text" class="kn-input" name="home_town_kn" placeholder="ಸ್ವಸ್ಥಳದ ವಿವರ ಕನ್ನಡದಲ್ಲಿ"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PART II -->
+    <div id="part2" class="section-panel form-part">
+      <div class="card">
+        <div class="card-header">
+          <span>PART II : A. EDUCATIONAL QUALIFICATIONS</span>
+          <button type="button" class="btn btn-amber btn-sm no-print" onclick="addEduRow()">+ Add Row</button>
+        </div>
+        <div id="eduContainer"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span>PART II : B. FAMILY PARTICULARS &amp; C. NOMINATION</span>
+          <button type="button" class="btn btn-amber btn-sm no-print" onclick="addFamilyRow()">+ Add Member</button>
+        </div>
+        <div id="familyContainer"></div>
+      </div>
+    </div>
+
+    <!-- PART III -->
+    <div id="part3" class="section-panel form-part">
+      <div class="card">
+        <div class="card-header">PART III : PREVIOUS QUALIFYING SERVICE &amp; FOREIGN SERVICE</div>
+        <table class="esr-table">
+          <tbody>
+            <tr>
+              <td class="field-label">Previous Service Applicable? &amp; Details</td>
+              <td><select name="prev_srv_app"><option>No</option><option>Yes</option></select></td>
+              <td><input type="text" name="prev_srv_info" placeholder="Post, Dept, Period, GO No. & Date"></td>
+            </tr>
+            <tr>
+              <td class="field-label">Foreign Service Applicable? &amp; Details</td>
+              <td><select name="for_srv_app"><option>No</option><option>Yes</option></select></td>
+              <td><input type="text" name="for_srv_info" placeholder="Employer, Period, Contribution & GO No."></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PART IV (1-4) -->
+    <div id="part4a" class="section-panel form-part">
+      <div class="card">
+        <div class="card-header">PART IV : 1.0 APPOINTMENT, 2. PROBATION &amp; 3. PROMOTION DETAILS</div>
+        <table class="esr-table">
+          <tbody>
+            <tr>
+              <td class="field-label">Appointment Order No. &amp; Order Date <span class="req">*</span></td>
+              <td><input type="text" name="appt_order_no" placeholder="Order Number"></td>
+              <td><input type="date" name="appt_order_date"></td>
+            </tr>
+            <tr>
+              <td class="field-label">Date of Entry into Service <span class="req">*</span> &amp; Forenoon/Afternoon</td>
+              <td><input type="date" name="govt_entry_date"></td>
+              <td><select name="govt_entry_time"><option>Forenoon</option><option>Afternoon</option></select></td>
+            </tr>
+            <tr>
+              <td class="field-label">Present Cadre, Office, Payscale &amp; Basic Pay <span class="req">*</span></td>
+              <td><input type="text" name="present_cadre" placeholder="Cadre & Office/School Name"></td>
+              <td><input type="text" name="payscale_basic" placeholder="Payscale & Basic Pay"></td>
+            </tr>
+            <tr>
+              <td class="field-label">Probation Declaration Order No., Date &amp; Promotion Details</td>
+              <td><input type="text" name="prob_details" placeholder="Probation Order No. & Date"></td>
+              <td><input type="text" name="promo_details" placeholder="Time-bound / Promotion Order & Pay"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PART IV (5-13) & VI -->
+    <div id="part4b" class="section-panel form-part">
+      <div class="card">
+        <div class="card-header">PART IV (5-13) &amp; PART VI : CHARGE, AWARDS, PERMISSIONS &amp; LTC</div>
+        <table class="esr-table">
+          <tbody>
+            <tr>
+              <td class="field-label">Rule 32/68 Charge, Awards &amp; Permissions (Higher Ed / Property / NOC)</td>
+              <td colspan="2"><input type="text" name="charge_awards_perm" placeholder="Enter details if applicable, else Nil"></td>
+            </tr>
+            <tr>
+              <td class="field-label">Part VI : HTC / LTC Block Period, Place &amp; Sanction Order</td>
+              <td colspan="2"><input type="text" name="htc_ltc_details" placeholder="HTC / LTC details if availed"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </form>
+
+  <!-- COPY-PASTE DASHBOARD -->
+  <div id="panel-copypaste" class="section-panel no-print">
+    <div class="card">
+      <div class="card-header">
+        <span>&#128203; HRMS COPY-PASTE &amp; &le;100 KB PHOTO DOWNLOAD</span>
+        <button class="btn btn-amber btn-sm" onclick="buildCopyPasteView()">&#128260; Refresh</button>
+      </div>
+      <div style="padding:12px;">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;" id="photoDownloadCards"></div>
+        <div id="copyPasteList" style="border:1px solid #cbd5e1;border-radius:6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP LINK -->
+  <div id="panel-settings" class="section-panel no-print">
+    <div class="card">
+      <div class="card-header">&#9881; Google Apps Script Web App URL</div>
+      <div style="padding:14px;">
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="gasUrlInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+          <button class="btn btn-primary" onclick="saveGasUrl()">Save URL</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAMERA MODAL -->
+<div class="modal-backdrop no-print" id="cameraModal">
+  <div class="modal-box">
+    <h3 style="margin-top:0;">&#128247; Capture Photo (&le; 100 KB)</h3>
+    <video id="cameraStream" autoplay playsinline></video>
+    <div style="margin-top:12px;display:flex;gap:10px;justify-content:center;">
+      <button type="button" class="btn btn-success" onclick="snapCameraPhoto()">&#128248; Capture</button>
+      <button type="button" class="btn btn-outline" onclick="closeCamera()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER (HIDDEN IN PRINT) -->
+<footer class="app-footer no-print">
+  Designed by: <span class="footer-highlight">LAKSHMIKANTH R (Mob: 9844444871)</span> &nbsp;|&nbsp;
+  <span class="footer-kn">ಸಹಕಾರ ಮತ್ತು ಮಾರ್ಗದರ್ಶನ : VENKATARAMANAIAH PRESIDENT KSTPA CHIKKANAYAKANAHALLI TALUK TUMKUR DISTRICT</span>
+</footer>
+
+<script>
+  const DEFAULT_GAS_URL = "";
+  let photoStore = { emp: "", fam: "" };
+  let activeCamTarget = "emp";
+  let mediaStream = null;
+  let translitTimers = {};
+
+  function openTab(panelId, btnEl) {
+    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+    if (btnEl && btnEl.classList.contains('tab-btn')) btnEl.classList.add('active');
+    if (panelId === 'panel-copypaste') buildCopyPasteView();
+  }
+
+  function handleTransliterate(inputEl) {
+    const targetName = inputEl.getAttribute('data-kn-target');
+    if (!targetName) return;
+    const targetEl = document.querySelector(`[name="${targetName}"]`);
+    if (!targetEl) return;
+    clearTimeout(translitTimers[targetName]);
+    const text = inputEl.value.trim();
+    if (!text) { targetEl.value = ""; return; }
+    translitTimers[targetName] = setTimeout(async () => {
+      try {
+        const url = `https://inputtools.google.com/request?text=${encodeURIComponent(text)}&itc=kn-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data[0] === "SUCCESS" && data[1]?.[0]?.[1]?.[0]) {
+          targetEl.value = data[1][0][1][0];
+          return;
+        }
+      } catch (e) {}
+      targetEl.value = offlinePhoneticKannada(text);
+    }, 300);
+  }
+
+  function offlinePhoneticKannada(str) {
+    const map = [
+      ['ksh','ಕ್ಷ'],['jnj','ಜ್ಞ'],['sh','ಶ'],['ch','ಚ'],['th','ಥ'],['dh','ಧ'],['bh','ಭ'],['ph','ಫ'],['kh','ಖ'],['gh','ಘ'],
+      ['aa','ಆ'],['ee','ಈ'],['oo','ಊ'],['ai','ಐ'],['au','ಔ'],
+      ['a','ಅ'],['i','ಇ'],['u','ಉ'],['e','ಎ'],['o','ಒ'],
+      ['k','ಕ'],['g','ಗ'],['j','ಜ'],['t','ಟ'],['d','ಡ'],['n','ನ'],['p','ಪ'],['b','ಬ'],['m','ಮ'],
+      ['y','ಯ'],['r','ರ'],['l','ಲ'],['v','ವ'],['w','ವ'],['s','ಸ'],['h','ಹ']
+    ];
+    let out = str.toLowerCase();
+    for (const [en, kn] of map) out = out.split(en).join(kn);
+    return out;
+  }
+
+  function autoFillDobWords(val) {
+    if (!val) return;
+    const [y, m, d] = val.split('-').map(Number);
+    const months = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const el = document.querySelector('[name="dob_words"]');
+    if (el) el.value = `${d} ${months[m]} ${y}`;
+  }
+
+  function compressImageTo100KB(imgSource, targetKey) {
+    const canvas = document.createElement('canvas');
+    let width = imgSource.width || imgSource.videoWidth;
+    let height = imgSource.height || imgSource.videoHeight;
+    const maxDim = targetKey === 'emp' ? 450 : 650;
+    if (width > maxDim || height > maxDim) {
+      if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
+      else { width = Math.round((width * maxDim) / height); height = maxDim; }
+    }
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(imgSource, 0, 0, width, height);
+
+    let quality = 0.88;
+    let dataUrl = canvas.toDataURL('image/jpeg', quality);
+    while (Math.round((dataUrl.length * 3) / 4) > 98 * 1024 && quality > 0.15) {
+      quality -= 0.07;
+      dataUrl = canvas.toDataURL('image/jpeg', quality);
+    }
+    const kbSize = (Math.round((dataUrl.length * 3) / 4) / 1024).toFixed(1);
+    photoStore[targetKey] = dataUrl;
+    const previewEl = document.getElementById(targetKey === 'emp' ? 'empPhotoPreview' : 'famPhotoPreview');
+    const metaEl = document.getElementById(targetKey === 'emp' ? 'empPhotoMeta' : 'famPhotoMeta');
+    previewEl.innerHTML = `<img src="${dataUrl}" alt="Photo">`;
+    metaEl.style.display = 'inline-block';
+    metaEl.textContent = `Ready: ${kbSize} KB (.JPG)`;
+  }
+
+  function processImageFile(event, targetKey) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => compressImageTo100KB(img, targetKey);
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function openCamera(targetKey) {
+    activeCamTarget = targetKey;
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraStream');
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+      video.srcObject = mediaStream;
+      modal.classList.add('open');
+    } catch (err) {
+      alert("Camera unavailable. Please use Upload Photo.");
+    }
+  }
+
+  function snapCameraPhoto() {
+    compressImageTo100KB(document.getElementById('cameraStream'), activeCamTarget);
+    closeCamera();
+  }
+
+  function closeCamera() {
+    document.getElementById('cameraModal').classList.remove('open');
+    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+  }
+
+  function addEduRow(data = {}) {
+    const c = document.getElementById('eduContainer');
+    const idx = c.children.length + 1;
+    const div = document.createElement('div');
+    div.className = 'repeat-item';
+    div.innerHTML = `
+      <div class="repeat-head"><span>Qualification #${idx}</span><button type="button" class="btn btn-danger btn-sm no-print" onclick="this.closest('.repeat-item').remove()">Remove</button></div>
+      <table class="esr-table">
+        <tr>
+          <td><input type="text" name="edu_course[]" placeholder="Course (SSLC/PUC/Degree/D.Ed/B.Ed)" value="${data.course || ''}"></td>
+          <td><input type="text" name="edu_year[]" placeholder="Year, Reg No. & Board/Univ"></td>
+          <td><input type="text" name="edu_marks[]" placeholder="% Marks, Medium & Cert No."></td>
+        </tr>
+      </table>`;
+    c.appendChild(div);
+  }
+
+  function addFamilyRow() {
+    const c = document.getElementById('familyContainer');
+    const idx = c.children.length + 1;
+    const div = document.createElement('div');
+    div.className = 'repeat-item';
+    div.innerHTML = `
+      <div class="repeat-head"><span>Family / Nominee #${idx}</span><button type="button" class="btn btn-danger btn-sm no-print" onclick="this.closest('.repeat-item').remove()">Remove</button></div>
+      <table class="esr-table">
+        <tr>
+          <td><input type="text" name="fam_name[]" placeholder="Member / Nominee Name & Relation"></td>
+          <td><input type="text" name="fam_dob[]" placeholder="DOB, Gender & Dependent/Nomination For"></td>
+          <td><input type="text" name="fam_share[]" placeholder="Share %, Mobile & Address"></td>
+        </tr>
+      </table>`;
+    c.appendChild(div);
+  }
+
+  function collectFormData() {
+    const fd = new FormData(document.getElementById('esrForm'));
+    const data = {};
+    for (const [k, v] of fd.entries()) {
+      if (k.endsWith('[]')) {
+        if (!data[k]) data[k] = [];
+        data[k].push(v);
+      } else {
+        data[k] = v;
+      }
+    }
+    data._boardTitle = document.querySelector('.board-title').innerText.trim();
+    data._boardSubtitle = document.querySelector('.board-subtitle').innerText.trim();
+    data._empPhoto = photoStore.emp;
+    data._famPhoto = photoStore.fam;
+    return data;
+  }
+
+  function buildCopyPasteView() {
+    const data = collectFormData();
+    const photoDiv = document.getElementById('photoDownloadCards');
+    const empName = (data.emp_name_en || data.kgid_no || 'Employee').replace(/\s+/g, '_');
+    let photoHtml = "";
+    if (photoStore.emp) {
+      photoHtml += `<div style="border:1px solid #cbd5e1;padding:10px;border-radius:8px;text-align:center;background:#f8fafc;">
+        <img src="${photoStore.emp}" style="width:100px;height:120px;object-fit:cover;border-radius:4px;"><br>
+        <a href="${photoStore.emp}" download="${empName}_Photo.jpg" class="btn btn-success btn-sm" style="margin-top:6px;text-decoration:none;">&#11015; Download Photo (&le;100KB)</a>
+      </div>`;
+    }
+    if (photoStore.fam) {
+      photoHtml += `<div style="border:1px solid #cbd5e1;padding:10px;border-radius:8px;text-align:center;background:#f8fafc;">
+        <img src="${photoStore.fam}" style="width:130px;height:120px;object-fit:cover;border-radius:4px;"><br>
+        <a href="${photoStore.fam}" download="${empName}_Family.jpg" class="btn btn-success btn-sm" style="margin-top:6px;text-decoration:none;">&#11015; Download Family (&le;100KB)</a>
+      </div>`;
+    }
+    photoDiv.innerHTML = photoHtml || '<span class="hint">No photos uploaded/captured yet.</span>';
+
+    const listDiv = document.getElementById('copyPasteList');
+    let rowsHtml = "";
+    document.querySelectorAll('#esrForm input[name], #esrForm select[name]').forEach(el => {
+      const val = el.value.trim();
+      if (!val) return;
+      const tr = el.closest('tr');
+      let label = tr?.querySelector('.field-label')?.innerText.replace('*', '').trim() || el.placeholder || el.name;
+      if (el.classList.contains('kn-input')) label += " (ಕನ್ನಡ)";
+      const safeVal = val.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+      rowsHtml += `<div class="copy-row"><div><strong style="font-size:0.82rem;">${label}:</strong> <span class="copy-val">${val}</span></div><button type="button" class="btn btn-primary btn-sm" onclick="copyText(this, '${safeVal}')">Copy</button></div>`;
+    });
+    listDiv.innerHTML = rowsHtml || '<div style="padding:14px;color:#64748b;">Fill form fields to see one-click Copy buttons here.</div>';
+  }
+
+  function copyText(btn, text) {
+    navigator.clipboard.writeText(text);
+    const orig = btn.textContent;
+    btn.textContent = "Copied!";
+    btn.style.background = "#15803d";
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ""; }, 1000);
+  }
+
+  function saveLocalDraft() {
+    localStorage.setItem('karnataka_esr_draft_v2', JSON.stringify(collectFormData()));
+    alert("Draft saved!");
+  }
+
+  function loadLocalDraft() {
+    const raw = localStorage.getItem('karnataka_esr_draft_v2');
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      if (data._boardTitle) document.querySelector('.board-title').innerText = data._boardTitle;
+      if (data._boardSubtitle) document.querySelector('.board-subtitle').innerText = data._boardSubtitle;
+      Object.keys(data).forEach(k => {
+        if (k.startsWith('_') || k.endsWith('[]')) return;
+        const el = document.querySelector(`[name="${k}"]`);
+        if (el) el.value = data[k];
+      });
+      if (data._empPhoto) {
+        photoStore.emp = data._empPhoto;
+        document.getElementById('empPhotoPreview').innerHTML = `<img src="${data._empPhoto}">`;
+        document.getElementById('empPhotoMeta').style.display = 'inline-block';
+        document.getElementById('empPhotoMeta').textContent = "Loaded (<=100 KB)";
+      }
+      if (data._famPhoto) {
+        photoStore.fam = data._famPhoto;
+        document.getElementById('famPhotoPreview').innerHTML = `<img src="${data._famPhoto}">`;
+        document.getElementById('famPhotoMeta').style.display = 'inline-block';
+        document.getElementById('famPhotoMeta').textContent = "Loaded (<=100 KB)";
+      }
+    } catch (e) {}
+  }
+
+  function exportCSV() {
+    const data = collectFormData();
+    const keys = Object.keys(data).filter(k => !k.startsWith('_'));
+    const csv = [keys.join(','), keys.map(k => `"${String(Array.isArray(data[k]) ? data[k].join(' | ') : (data[k] || '')).replace(/"/g, '""')}"`).join(',')].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = `${(data.emp_name_en || 'ESR_Employee').replace(/\s+/g, '_')}_ESR.csv`;
+    a.click();
+  }
+
+  function exportJSON() {
+    const data = collectFormData();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    a.download = `${(data.emp_name_en || 'ESR_Employee').replace(/\s+/g, '_')}_ESR.json`;
+    a.click();
+  }
+
+  function importJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      localStorage.setItem('karnataka_esr_draft_v2', e.target.result);
+      loadLocalDraft();
+      alert("JSON data loaded!");
+    };
+    reader.readAsText(file);
+  }
+
+  function saveGasUrl() {
+    localStorage.setItem('esr_gas_url', document.getElementById('gasUrlInput').value.trim());
+    alert("URL saved!");
+  }
+
+  async function submitToGoogleSheet() {
+    const gasUrl = localStorage.getItem('esr_gas_url') || DEFAULT_GAS_URL;
+    if (!gasUrl) { alert("Set Google Apps Script URL in 'Setup Link' first."); return; }
+    const data = collectFormData();
+    if (!data.emp_name_en) { alert("Enter employee name first."); return; }
+    const btn = document.getElementById('btnCloudSubmit');
+    btn.textContent = "Submitting..."; btn.disabled = true;
+    try {
+      await fetch(gasUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      alert("Submitted successfully!");
+    } catch (e) {
+      alert("Error: " + e.message);
+    } finally {
+      btn.textContent = "☁ Submit Online"; btn.disabled = false;
+    }
+  }
+
+  function clearAllData() {
+    if (confirm("Clear all data?")) {
+      localStorage.removeItem('karnataka_esr_draft_v2');
+      location.reload();
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    addEduRow({ course: 'SSLC' });
+    addEduRow({ course: 'PUC / D.Ed' });
+    addFamilyRow();
+    const savedGas = localStorage.getItem('esr_gas_url');
+    if (savedGas) document.getElementById('gasUrlInput').value = savedGas;
+    loadLocalDraft();
+  });
+</script>
+</body>
+</html>
